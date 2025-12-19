@@ -20,16 +20,16 @@ object Constants {
 
     // Sayur (Produk)
     const val GET_SAYUR = "api/sayur"
-    const val ADD_SAYUR = "api/sayur/add"
-    const val UPDATE_SAYUR = "api/sayur/update"
-    const val DELETE_SAYUR = "api/sayur/delete"
+    const val ADD_SAYUR = "api/sayur"
+    const val UPDATE_SAYUR = "api/sayur/{id}"
+    const val DELETE_SAYUR = "api/sayur/{id}"
 
 
     // Cart (Keranjang)
-    const val GET_CART = "api/cart/"
     const val ADD_TO_CART = "api/cart/"
-    const val UPDATE_CART = "api/cart/update/{cart_id}"
-    const val DELETE_CART = "api/cart/delete/{cart_id}"
+    const val UPDATE_CART = "api/cart/{cart_id}"
+    const val DELETE_CART = "api/cart/{cart_id}"
+    const val CLEAR_CART = "api/cart/user/{user_id}"
     const val GET_CART_BY_USER = "api/cart/user/{user_id}"
 
     // Address (Alamat)
@@ -37,21 +37,23 @@ object Constants {
     const val GET_ADDRESSES = "api/addresses/user/{user_id}"
     const val SET_DEFAULT_ADDRESS = "api/addresses/set-default"
     const val GET_DEFAULT_ADDRESS = "api/addresses/default/{user_id}"
-    const val DELETE_ADDRESS = "api/addresses/delete/{address_id}"
+    const val DELETE_ADDRESS = "api/addresses/{address_id}"
 
     // Alamat - Komerce Search
     const val SEARCH_DESTINATION = "api/addresses/search-destinations"
 
     // Pengiriman (Ongkir)
-    const val HITUNG_ONGKIR = "api/pengiriman/hitung-ongkir"
+    const val HITUNG_ONGKIR = "api/pengiriman/hitung"
+    const val HITUNG_ONGKIR_V2 = "api/pengiriman/hitung-v2"
     const val PILIH_PENGIRIMAN = "api/pengiriman/pilih"
 
     // Pesanan (Checkout & History)
     const val CREATE_PESANAN = "api/pesanan"
     const val GET_PESANAN_CLIENT = "api/pesanan/user/"
     const val GET_PESANAN_ADMIN = "api/pesanan/admin"
-    const val GET_DETAIL_PESANAN = "api/pesanan/detail/"
-    const val UPDATE_STATUS_PESANAN = "api/pesanan/status"
+    const val GET_PESANAN_USER = "api/pesanan/user/{user_id}"
+    const val GET_DETAIL_PESANAN = "api/pesanan/{id}"
+    const val UPDATE_STATUS_PESANAN = "api/pesanan/{id}/status"
 
     // --- NAVIGATION ROUTES ---
     const val ROUTE_LOGIN = "login"

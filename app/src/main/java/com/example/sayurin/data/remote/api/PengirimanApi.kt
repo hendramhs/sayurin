@@ -10,6 +10,9 @@ interface PengirimanApi {
     @POST(Constants.HITUNG_ONGKIR)
     suspend fun hitungOngkir(@Body request: OngkirRequest): OngkirResponse
 
+    @POST(Constants.HITUNG_ONGKIR_V2)
+    suspend fun hitungOngkirV2(@Body request: OngkirRequestV2): OngkirResponseV2
+
     @POST(Constants.PILIH_PENGIRIMAN)
-    suspend fun pilihPengiriman(@Body request: PilihPengirimanRequest): CommonResponse
+    suspend fun pilihPengiriman(@Body request: PilihPengirimanRequest): PilihPengirimanResponse
 }

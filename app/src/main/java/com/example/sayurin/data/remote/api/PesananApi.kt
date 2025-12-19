@@ -7,10 +7,14 @@ import retrofit2.http.*
 
 interface PesananApi {
     @POST(Constants.CREATE_PESANAN)
-    suspend fun createPesanan(@Body request: CreatePesananRequest): CommonResponse // Biasanya responnya cukup CommonResponse
+    suspend fun createPesanan(@Body request: CreatePesananRequest): CreatePesananResponse // Biasanya responnya cukup CommonResponse
 
     @GET(Constants.GET_PESANAN_ADMIN)
     suspend fun getPesananAdmin(): List<PesananAdminResponse>
+
+    @GET(Constants.GET_PESANAN_USER)
+    suspend fun getPesananUser(@Path("user_id") userId: Int): List<PesananUserResponse>
+
 
     @GET(Constants.GET_DETAIL_PESANAN)
     suspend fun getDetailPesanan(@Path("id") id: Int): List<DetailPesananResponse>

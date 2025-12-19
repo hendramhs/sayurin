@@ -1,8 +1,11 @@
 package com.example.sayurin.ui.client.cart
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
@@ -13,10 +16,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.sayurin.data.remote.dto.cart.CartItem
@@ -32,14 +37,18 @@ fun CartScreen(
     val isLoading by viewModel.isLoading
 
     Scaffold(
+        containerColor = Color(0xFFF8FBF8), // Background hijau muda
         topBar = {
-            TopAppBar(
-                title = { Text("Keranjang Belanja") },
+            CenterAlignedTopAppBar(
+                title = { Text("Keranjang Saya", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Kembali")
                     }
-                }
+                },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = Color.White
+                )
             )
         },
         bottomBar = {
@@ -51,29 +60,35 @@ fun CartScreen(
             }
         }
     ) { padding ->
-        if (isLoading) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
-            }
-        } else if (cartItems.isEmpty()) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Keranjang Anda kosong")
-            }
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .padding(padding)
-                    .fillMaxSize(),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(cartItems) { item ->
-                    CartItemRow(
-                        item = item,
-                        onIncrease = { viewModel.updateQuantity(item.cart_id, item.jumlah + 1) },
-                        onDecrease = { viewModel.updateQuantity(item.cart_id, item.jumlah - 1) },
-                        onDelete = { viewModel.deleteItem(item.cart_id) }
-                    )
+        Box(modifier = Modifier
+            .padding(padding)
+            .fillMaxSize()) {
+            if (isLoading && cartItems.isEmpty()) {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            } else if (cartItems.isEmpty()) {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text("Keranjang Anda kosong", color = Color.Gray)
+                    Text("Mulai belanja sayur segar sekarang!", style = MaterialTheme.typography.bodySmall, color = Color.LightGray)
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    items(cartItems) { item ->
+                        CartItemRow(
+                            item = item,
+                            onIncrease = { viewModel.updateQuantity(item.cart_id, item.jumlah + 1) },
+                            onDecrease = { if (item.jumlah > 1) viewModel.updateQuantity(item.cart_id, item.jumlah - 1) },
+                            onDelete = { viewModel.deleteItem(item.cart_id) }
+                        )
+                    }
+                    item { Spacer(modifier = Modifier.height(80.dp)) }
                 }
             }
         }
@@ -89,41 +104,103 @@ fun CartItemRow(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(2.dp)
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
             modifier = Modifier
-                .padding(8.dp)
+                .padding(12.dp)
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // AsyncImage dengan placeholder hijau khas Sayurin
             AsyncImage(
-//                model = "http://10.0.2.2:5000/uploads/${item.gambar}", // Sesuaikan IP backend
-                model = "https://via.placeholder.com/150",
+                model = "https://placehold.co/150x150/c6d870/556b2f.png?text=${item.nama_sayur}&font=lato",
                 contentDescription = item.nama_sayur,
-                modifier = Modifier.size(80.dp),
+                modifier = Modifier
+                    .size(90.dp)
+                    .clip(RoundedCornerShape(12.dp)),
                 contentScale = ContentScale.Crop
             )
-            Spacer(modifier = Modifier.width(12.dp))
+
+            Spacer(modifier = Modifier.width(16.dp))
+
             Column(modifier = Modifier.weight(1f)) {
-                Text(item.nama_sayur, fontWeight = FontWeight.Bold)
-                Text("Rp ${item.harga} / ${item.satuan}", style = MaterialTheme.typography.bodySmall)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Top
+                ) {
+                    Column {
+                        Text(item.nama_sayur, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
+                        Text(
+                            "Rp ${item.harga} / ${item.satuan}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.Gray
+                        )
+                    }
+                    IconButton(
+                        onClick = onDelete,
+                        modifier = Modifier.size(24.dp)
+                    ) {
+                        Icon(Icons.Default.Delete, contentDescription = "Hapus", tint = Color(0xFFEF5350), modifier = Modifier.size(20.dp))
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(top = 8.dp)
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    IconButton(onClick = onDecrease) {
-                        Icon(Icons.Filled.Remove, contentDescription = null)
-                    }
-                    Text("${item.jumlah}", modifier = Modifier.padding(horizontal = 8.dp))
-                    IconButton(onClick = onIncrease) {
-                        Icon(Icons.Default.Add, contentDescription = null)
+                    Text(
+                        "Rp ${item.harga * item.jumlah}",
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontSize = 15.sp
+                    )
+
+                    // Control Quantity yang lebih cantik
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(50))
+                            .background(Color(0xFFF1F8F1)) // Hijau sangat muda
+                    ) {
+                        IconButton(
+                            onClick = onDecrease,
+                            modifier = Modifier.size(32.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Remove,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp),
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+
+                        Text(
+                            text = "${item.jumlah}",
+                            modifier = Modifier.padding(horizontal = 8.dp),
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+
+                        IconButton(
+                            onClick = onIncrease,
+                            modifier = Modifier.size(32.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp),
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
                     }
                 }
-            }
-            IconButton(onClick = onDelete) {
-                Icon(Icons.Default.Delete, contentDescription = "Hapus", tint = Color.Red)
             }
         }
     }
@@ -135,31 +212,41 @@ fun BottomCheckoutBar(
     onCheckout: () -> Unit
 ) {
     Surface(
+        color = Color.White,
         tonalElevation = 8.dp,
-        shadowElevation = 8.dp
+        shadowElevation = 12.dp,
+        shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
     ) {
         Row(
             modifier = Modifier
+                .navigationBarsPadding()
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(horizontal = 24.dp, vertical = 20.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column {
-                Text("Total Pembayaran", style = MaterialTheme.typography.bodySmall)
+                Text("Total Estimasi", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
                 Text(
                     "Rp $totalHarga",
-                    style = MaterialTheme.typography.titleLarge,
+                    style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.ExtraBold
                 )
             }
             Button(
                 onClick = onCheckout,
-                shape = MaterialTheme.shapes.medium
+                modifier = Modifier
+                    .height(54.dp)
+                    .width(150.dp),
+                shape = RoundedCornerShape(14.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
-                Text("Checkout")
+                Text("Checkout", fontWeight = FontWeight.Bold, fontSize = 16.sp)
             }
         }
     }
 }
+
+// Extension untuk membantu sizing icon
+private fun Modifier.size(size: Int): Modifier = this.size(size.dp)

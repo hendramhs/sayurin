@@ -14,21 +14,19 @@ import com.example.sayurin.data.remote.dto.sayur.SayurResponse
 @Composable
 fun SayurItem(
     sayur: SayurResponse,
-    onItemClick: () -> Unit,
     onAddClick: () -> Unit, // 1. TAMBAHKAN PARAMETER INI
     modifier: Modifier = Modifier
 ) {
     Card(
         modifier = modifier
             .padding(8.dp)
-            .fillMaxWidth()
-            .clickable { onItemClick() },
+            .fillMaxWidth(),
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
         Column {
             AsyncImage(
 //                model = "http://10.0.2.2:5000/uploads/${sayur.gambar}",
-                model = "https://via.placeholder.com/150",
+                model = "https://placehold.co/150x150/c6d870/556b2f.png?text=${sayur.nama_sayur}&font=lato",
                 contentDescription = sayur.nama_sayur,
                 modifier = Modifier
                     .fillMaxWidth()

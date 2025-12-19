@@ -2,6 +2,7 @@ package com.example.sayurin.data.repository
 
 import com.example.sayurin.data.remote.api.CartApi
 import com.example.sayurin.data.remote.dto.cart.*
+import com.example.sayurin.data.remote.dto.sayur.CommonResponse
 import javax.inject.Inject
 
 class CartRepository @Inject constructor(
@@ -29,5 +30,15 @@ class CartRepository @Inject constructor(
         Result.success(api.deleteCartItem(cartId))
     } catch (e: Exception) {
         Result.failure(e)
+    }
+
+    // Perbaikan: Tambahkan implementasi body fungsi clearCart
+    suspend fun clearCart(userId: Int): Result<CommonResponse> {
+        return try {
+            val response = api.clearCart(userId)
+            Result.success(response)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 }

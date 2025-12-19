@@ -15,7 +15,7 @@ interface AddressApi {
     @GET(Constants.GET_DEFAULT_ADDRESS)
     suspend fun getDefaultAddress(@Path("user_id") userId: Int): DefaultAddressResponse
 
-    @POST(Constants.SET_DEFAULT_ADDRESS)
+    @PUT(Constants.SET_DEFAULT_ADDRESS)
     suspend fun setDefaultAddress(@Body request: SetDefaultAddressRequest): CommonResponse
 
     @DELETE(Constants.DELETE_ADDRESS)

@@ -20,4 +20,8 @@ interface CartApi {
 
     @DELETE(Constants.DELETE_CART)
     suspend fun deleteCartItem(@Path("cart_id") cartId: Int): CommonResponse
+
+    @DELETE(Constants.CLEAR_CART)
+    suspend fun clearCart(@Path("user_id") userId: Int): CommonResponse
+
 }
