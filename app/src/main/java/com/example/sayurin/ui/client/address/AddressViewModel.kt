@@ -36,22 +36,31 @@ class AddressViewModel @Inject constructor(
     fun fetchAddresses() {
         viewModelScope.launch {
             _isLoading.value = true
+            // Ambil userId dari Preferences
             val userId = userPrefs.userId.first() ?: 0
-            repository.getAddresses(userId).onSuccess {
-                _addresses.value = it.data
+
+            println("DEBUG: Fetching addresses for userId: $userId")
+
+            if (userId != 0) {
+                repository.getAddresses(userId).onSuccess { response ->
+                    _addresses.value = response.data
+                    println("DEBUG: Berhasil memuat ${response.data.size} alamat")
+                }.onFailure { error ->
+                    println("DEBUG: Gagal memuat alamat: ${error.message}")
+                }
             }
             _isLoading.value = false
         }
     }
 
     // Fungsi Pencarian Destinasi (Komerce)
-    fun searchDestinations(query: String) {
-        if (query.length < 3) {
+    fun searchDestinations(keyword: String) {
+        if (keyword.length < 3) {
             _searchResults.value = emptyList()
             return
         }
         viewModelScope.launch {
-            repository.searchDestinations(query).onSuccess { response ->
+            repository.searchDestinations(keyword).onSuccess { response ->
                 _searchResults.value = response.destinations
             }.onFailure {
                 _searchResults.value = emptyList()
@@ -66,8 +75,11 @@ class AddressViewModel @Inject constructor(
         alamat: String,
         destId: Int,
         label: String,
+        subdistrict: String,
+        district: String,
         city: String,
         province: String,
+        zipCode: String,
         onSuccess: () -> Unit
     ) {
         viewModelScope.launch {
@@ -81,15 +93,21 @@ class AddressViewModel @Inject constructor(
                 penerima_hp = hp,
                 alamat_lengkap = alamat,
                 destination_id = destId,
+                subdistrict = subdistrict,
+                district = district,
                 city = city,
                 province = province,
+                zip_code = zipCode,
                 is_default = if (_addresses.value.isEmpty()) 1 else 0, // Default jika alamat pertama
-                subdistrict = null, district = null, zip_code = null // Optional
             )
 
             repository.addAddress(request).onSuccess {
-                fetchAddresses() // Refresh list alamat
-                onSuccess()      // Kembali ke halaman sebelumnya
+                println("SIMPAN BERHASIL!")
+                fetchAddresses()
+                onSuccess()
+            }.onFailure { error ->
+                // Jika gagal, log error-nya untuk tahu penyebab dari server
+                println("SIMPAN GAGAL: ${error.message}")
             }
             _isLoading.value = false
         }

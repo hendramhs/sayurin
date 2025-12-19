@@ -22,5 +22,5 @@ interface AddressApi {
     suspend fun deleteAddress(@Path("address_id") addressId: Int): CommonResponse
 
     @GET(Constants.SEARCH_DESTINATION)
-    suspend fun searchDestination(@Query("query") query: String): KomerceSearchResponse
+    suspend fun searchDestination(@Query("keyword") keyword: String): KomerceSearchResponse
 }

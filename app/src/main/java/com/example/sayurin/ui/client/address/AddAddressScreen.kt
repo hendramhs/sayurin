@@ -21,7 +21,7 @@ fun AddAddressScreen(
     onBack: () -> Unit,
     viewModel: AddressViewModel = hiltViewModel()
 ) {
-    var query by remember { mutableStateOf("") }
+    var keyword by remember { mutableStateOf("") }
     var selectedDest by remember { mutableStateOf<KomerceDestination?>(null) }
     var alamatLengkap by remember { mutableStateOf("") }
     var namaPenerima by remember { mutableStateOf("") }
@@ -78,9 +78,9 @@ fun AddAddressScreen(
             // FIELD PENCARIAN KECAMATAN / KOTA
             Text("Wilayah", style = MaterialTheme.typography.labelLarge)
             OutlinedTextField(
-                value = if (selectedDest != null) selectedDest!!.label else query,
+                value = if (selectedDest != null) selectedDest!!.label else keyword,
                 onValueChange = {
-                    query = it
+                    keyword = it
                     selectedDest = null // Reset pilihan jika user mengetik ulang
                     viewModel.searchDestinations(it) // Panggil pencarian di ViewModel
                 },
@@ -88,7 +88,7 @@ fun AddAddressScreen(
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = { Text("Contoh: Kebon Jeruk") },
                 supportingText = {
-                    if (selectedDest == null && query.isNotEmpty()) {
+                    if (selectedDest == null && keyword.isNotEmpty()) {
                         Text("Pilih wilayah dari daftar yang muncul", color = Color.Gray)
                     }
                 }
@@ -115,7 +115,7 @@ fun AddAddressScreen(
                             },
                             onClick = {
                                 selectedDest = dest
-                                query = dest.label
+                                keyword = dest.label
                             }
                         )
                         HorizontalDivider(thickness = 0.5.dp, color = Color.LightGray)
@@ -145,9 +145,12 @@ fun AddAddressScreen(
                             hp = hpPenerima,
                             alamat = alamatLengkap,
                             destId = it.id,
-                            label = "Utama",
+                            label = it.label,
+                            subdistrict = it.subdistrict_name ?: "",
+                            district = it.district_name ?: "",
                             city = it.city_name ?: "",
-                            province = it.province_name ?: ""
+                            province = it.province_name ?: "",
+                            zipCode = it.zip_code ?: ""
                         ) {
                             onBack() // Kembali ke halaman sebelumnya setelah berhasil simpan
                         }
