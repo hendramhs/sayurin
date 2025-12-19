@@ -17,18 +17,20 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val repository: SayurRepository,
-    private val cartRepository: CartRepository, // Tambahkan ini
+    private val cartRepository: CartRepository,
     private val userPrefs: UserPreferences
 ) : ViewModel() {
 
-    private val _state = mutableStateOf<List<SayurResponse>>(emptyList())
-    val state: State<List<SayurResponse>> = _state
+    // Menggunakan State Standar (Bukan Resource)
+    private val _sayurList = mutableStateOf<List<SayurResponse>>(emptyList())
+    val sayurList: State<List<SayurResponse>> = _sayurList
 
     private val _isLoading = mutableStateOf(false)
     val isLoading: State<Boolean> = _isLoading
 
-    private val _message = mutableStateOf<String?>(null)
-    val message: State<String?> = _message
+    // Pesan feedback untuk keranjang (Opsional)
+    private val _cartMessage = mutableStateOf<String?>(null)
+    val cartMessage: State<String?> = _cartMessage
 
     init {
         fetchSayur()
@@ -37,9 +39,14 @@ class HomeViewModel @Inject constructor(
     fun fetchSayur() {
         viewModelScope.launch {
             _isLoading.value = true
-            repository.getSayur().onSuccess {
-                _state.value = it
+
+            // Menggunakan .onSuccess dan .onFailure bawaan Result Kotlin
+            repository.getSayur().onSuccess { data ->
+                _sayurList.value = data
+            }.onFailure {
+                _sayurList.value = emptyList()
             }
+
             _isLoading.value = false
         }
     }
@@ -47,17 +54,22 @@ class HomeViewModel @Inject constructor(
     fun addToCart(sayurId: Int) {
         viewModelScope.launch {
             val userId = userPrefs.userId.first() ?: 0
-            if (userId != 0) {
-                cartRepository.addToCart(CartRequest(userId, sayurId, 1))
-                    .onSuccess {
-                        _message.value = "Berhasil masuk keranjang!" // <--- Tambahkan ini
-                    }
-                    .onFailure {
-                        _message.value = "Gagal menambah ke keranjang"
-                    }
+            if (userId == 0) {
+                _cartMessage.value = "Silakan login terlebih dahulu"
+                return@launch
             }
+
+            cartRepository.addToCart(CartRequest(userId, sayurId, 1))
+                .onSuccess {
+                    _cartMessage.value = "Berhasil masuk keranjang!"
+                }
+                .onFailure { error ->
+                    _cartMessage.value = error.message ?: "Gagal menambah ke keranjang"
+                }
         }
     }
 
-    fun clearMessage() { _message.value = null }
+    fun clearCartMessage() {
+        _cartMessage.value = null
+    }
 }

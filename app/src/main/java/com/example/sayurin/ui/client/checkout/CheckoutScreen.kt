@@ -89,11 +89,44 @@ fun CheckoutScreen(
 
             item { Divider() }
 
-            // TOTAL
+            // RINCIAN BIAYA PENGIRIMAN
             item {
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text("Subtotal Produk", fontWeight = FontWeight.Bold)
-                    Text("Rp $totalHarga", fontWeight = FontWeight.Bold)
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text("Ongkos Kirim")
+                        // Menampilkan kurir jika tersedia
+                        Text(
+                            text = if (viewModel.ongkir > 0) "Rp ${viewModel.ongkir}" else "Gratis/Belum dihitung",
+                            color = if (viewModel.ongkir > 0) Color.Unspecified else Color.Gray
+                        )
+                    }
+                    if (viewModel.courierName != null) {
+                        Text(
+                            text = "Kurir: ${viewModel.courierName}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.Gray
+                        )
+                    }
+                }
+            }
+
+            item { Divider() }
+
+            // TOTAL TAGIHAN
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text("Total Pembayaran", fontWeight = FontWeight.Bold)
+                    Text(
+                        "Rp $totalHarga",
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary,
+                        style = MaterialTheme.typography.titleMedium
+                    )
                 }
             }
         }

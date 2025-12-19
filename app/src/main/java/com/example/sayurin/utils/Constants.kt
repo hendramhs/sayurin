@@ -33,11 +33,11 @@ object Constants {
     const val GET_CART_BY_USER = "api/cart/user/{user_id}"
 
     // Address (Alamat)
-    const val ADD_ADDRESS = "api/address"
-    const val GET_ADDRESSES = "api/address/"
-    const val SET_DEFAULT_ADDRESS = "api/address/set-default"
-    const val GET_DEFAULT_ADDRESS = "api/address/default/"
-    const val DELETE_ADDRESS = "api/address/delete/{address_id}"
+    const val ADD_ADDRESS = "api/addresses"
+    const val GET_ADDRESSES = "api/addresses/"
+    const val SET_DEFAULT_ADDRESS = "api/addresses/set-default"
+    const val GET_DEFAULT_ADDRESS = "api/addresses/default/"
+    const val DELETE_ADDRESS = "api/addresses/delete/{address_id}"
 
     // Alamat - Komerce Search
     const val SEARCH_DESTINATION = "api/pengiriman/search-destination"

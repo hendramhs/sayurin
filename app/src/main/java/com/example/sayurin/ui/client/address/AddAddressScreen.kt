@@ -1,27 +1,21 @@
 package com.example.sayurin.ui.client.address
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.sayurin.data.remote.dto.address.KomerceDestination
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddAddressScreen(
     onBack: () -> Unit,
@@ -33,79 +27,138 @@ fun AddAddressScreen(
     var namaPenerima by remember { mutableStateOf("") }
     var hpPenerima by remember { mutableStateOf("") }
 
-    val destinations by viewModel.searchResults // Pastikan buat state ini di ViewModel
+    // Observasi hasil pencarian dari ViewModel
+    val destinations by viewModel.searchResults
 
-    Column(modifier = Modifier
-        .padding(16.dp)
-        .verticalScroll(rememberScrollState())) {
-        Text("Tambah Alamat Baru", style = MaterialTheme.typography.headlineSmall)
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Tambah Alamat Baru") },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Kembali")
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                )
+            )
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .padding(paddingValues)
+                .padding(16.dp)
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+        ) {
 
-        OutlinedTextField(
-            value = namaPenerima,
-            onValueChange = { namaPenerima = it },
-            label = { Text("Nama Penerima") },
-            modifier = Modifier.fillMaxWidth()
-        )
+            // FORM NAMA PENERIMA
+            OutlinedTextField(
+                value = namaPenerima,
+                onValueChange = { namaPenerima = it },
+                label = { Text("Nama Penerima") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
+            )
 
-        OutlinedTextField(
-            value = hpPenerima,
-            onValueChange = { hpPenerima = it },
-            label = { Text("No HP Penerima") },
-            modifier = Modifier.fillMaxWidth()
-        )
+            Spacer(modifier = Modifier.height(8.dp))
 
-        // SEARCH FIELD
-        OutlinedTextField(
-            value = if (selectedDest != null) selectedDest!!.label else query,
-            onValueChange = {
-                query = it
-                selectedDest = null
-                viewModel.searchDestinations(it) // Panggil fungsi pencarian di ViewModel
-            },
-            label = { Text("Cari Kecamatan / Kota") },
-            modifier = Modifier.fillMaxWidth()
-        )
+            // FORM NO HP
+            OutlinedTextField(
+                value = hpPenerima,
+                onValueChange = { hpPenerima = it },
+                label = { Text("No HP Penerima") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
+            )
 
-        // HASIL PENCARIAN (Drop down sederhana)
-        if (destinations.isNotEmpty() && selectedDest == null) {
-            Card(elevation = CardDefaults.cardElevation(4.dp)) {
-                destinations.forEach { dest ->
-                    DropdownMenuItem(
-                        text = { Text(dest.label) },
-                        onClick = { selectedDest = dest }
-                    )
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // FIELD PENCARIAN KECAMATAN / KOTA
+            Text("Wilayah", style = MaterialTheme.typography.labelLarge)
+            OutlinedTextField(
+                value = if (selectedDest != null) selectedDest!!.label else query,
+                onValueChange = {
+                    query = it
+                    selectedDest = null // Reset pilihan jika user mengetik ulang
+                    viewModel.searchDestinations(it) // Panggil pencarian di ViewModel
+                },
+                label = { Text("Cari Kecamatan / Kota") },
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = { Text("Contoh: Kebon Jeruk") },
+                supportingText = {
+                    if (selectedDest == null && query.isNotEmpty()) {
+                        Text("Pilih wilayah dari daftar yang muncul", color = Color.Gray)
+                    }
+                }
+            )
+
+            // DROPDOWN HASIL PENCARIAN
+            if (destinations.isNotEmpty() && selectedDest == null) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    elevation = CardDefaults.cardElevation(4.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                ) {
+                    destinations.forEach { dest ->
+                        DropdownMenuItem(
+                            text = {
+                                Column {
+                                    Text(dest.label, style = MaterialTheme.typography.bodyMedium)
+                                    Text(
+                                        "${dest.city_name}, ${dest.province_name}",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = Color.Gray
+                                    )
+                                }
+                            },
+                            onClick = {
+                                selectedDest = dest
+                                query = dest.label
+                            }
+                        )
+                        HorizontalDivider(thickness = 0.5.dp, color = Color.LightGray)
+                    }
                 }
             }
-        }
 
-        OutlinedTextField(
-            value = alamatLengkap,
-            onValueChange = { alamatLengkap = it },
-            label = { Text("Alamat Lengkap (Jalan, No Rumah)") },
-            modifier = Modifier.fillMaxWidth(),
-            minLines = 3
-        )
+            Spacer(modifier = Modifier.height(16.dp))
 
-        Button(
-            onClick = {
-                selectedDest?.let {
-                    viewModel.saveAddress(
-                        nama = namaPenerima,
-                        hp = hpPenerima,
-                        alamat = alamatLengkap,
-                        destId = it.id,
-                        label = "Rumah", // Bisa dibuat dinamis
-                        city = it.city_name ?: "",
-                        province = it.province_name ?: ""
-                    ) { onBack() }
-                }
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 16.dp),
-            enabled = selectedDest != null && namaPenerima.isNotEmpty()
-        ) {
-            Text("Simpan Alamat")
+            // FORM ALAMAT DETAIL
+            OutlinedTextField(
+                value = alamatLengkap,
+                onValueChange = { alamatLengkap = it },
+                label = { Text("Alamat Lengkap (Jalan, No Rumah, Patokan)") },
+                modifier = Modifier.fillMaxWidth(),
+                minLines = 3
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // TOMBOL SIMPAN
+            Button(
+                onClick = {
+                    selectedDest?.let {
+                        viewModel.saveAddress(
+                            nama = namaPenerima,
+                            hp = hpPenerima,
+                            alamat = alamatLengkap,
+                            destId = it.id,
+                            label = "Utama",
+                            city = it.city_name ?: "",
+                            province = it.province_name ?: ""
+                        ) {
+                            onBack() // Kembali ke halaman sebelumnya setelah berhasil simpan
+                        }
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = selectedDest != null && namaPenerima.isNotEmpty() && alamatLengkap.isNotEmpty(),
+                shape = MaterialTheme.shapes.medium
+            ) {
+                Text("Simpan Alamat")
+            }
         }
     }
 }

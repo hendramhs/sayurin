@@ -1,5 +1,6 @@
 package com.example.sayurin.ui.client.home
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -8,15 +9,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.isEmpty
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.sayurin.ui.components.SayurItem
-import android.widget.Toast
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -25,18 +25,10 @@ fun HomeScreen(
     onNavigateToCart: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
-    val sayurList by viewModel.state
+    // Observasi State Standar dari ViewModel
+    val sayurList by viewModel.sayurList
     val isLoading by viewModel.isLoading
-
-    val message by viewModel.message
     val context = LocalContext.current
-
-    LaunchedEffect(message) {
-        message?.let {
-            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
-            viewModel.clearMessage() // Reset pesan agar tidak muncul berulang
-        }
-    }
 
     Scaffold(
         topBar = {
@@ -58,13 +50,23 @@ fun HomeScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
+            // 1. Tampilan Loading
             if (isLoading) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            } else if (sayurList.isEmpty()) {
-                Text(
-                    text = "Sayur belum tersedia",
-                    modifier = Modifier.align(Alignment.Center)
-                )
+            }
+
+            // 2. Tampilan List atau Pesan Kosong
+            if (sayurList.isEmpty() && !isLoading) {
+                Column(
+                    modifier = Modifier.align(Alignment.Center),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(text = "Sayur belum tersedia")
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Button(onClick = { viewModel.fetchSayur() }) {
+                        Text("Refresh")
+                    }
+                }
             } else {
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
@@ -75,7 +77,11 @@ fun HomeScreen(
                         SayurItem(
                             sayur = sayur,
                             onItemClick = { onNavigateToDetail(sayur.sayur_id) },
-                            onAddClick = { viewModel.addToCart(sayur.sayur_id) } // Panggil fungsi addToCart
+                            onAddClick = {
+                                viewModel.addToCart(sayur.sayur_id)
+                                // Toast sederhana saat klik tambah
+                                Toast.makeText(context, "${sayur.nama_sayur} ditambahkan", Toast.LENGTH_SHORT).show()
+                            }
                         )
                     }
                 }
