@@ -1,59 +1,75 @@
-package com.example.sayurin.presentation.auth
+package com.example.sayurin.ui.auth
 
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.sayurin.data.local.datastore.UserPreferences
-import com.example.sayurin.domain.usecase.LoginUseCase
-import com.example.sayurin.domain.usecase.RegisterUseCase
+import com.example.sayurin.data.remote.dto.auth.LoginRequest
+import com.example.sayurin.data.remote.dto.auth.RegisterRequest
+import com.example.sayurin.data.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    private val loginUseCase: LoginUseCase,
-    private val registerUseCase: RegisterUseCase,
-    private val pref: UserPreferences
+    private val repository: AuthRepository
 ) : ViewModel() {
-    val role = pref.role
 
-    sealed class AuthState {
-        object Idle : AuthState()
-        object Loading : AuthState()
-        data class Success(val message: String = "") : AuthState()
-        data class Error(val message: String) : AuthState()
-    }
+    private val _isLoading = mutableStateOf(false)
+    val isLoading: State<Boolean> = _isLoading
 
-    private val _loginState = MutableStateFlow<AuthState>(AuthState.Idle)
-    val loginState = _loginState.asStateFlow()
+    private val _errorMessage = mutableStateOf<String?>(null)
+    val errorMessage: State<String?> = _errorMessage
 
-    private val _registerState = MutableStateFlow<AuthState>(AuthState.Idle)
-    val registerState = _registerState.asStateFlow()
+    // Event untuk navigasi ke Screen yang tepat setelah login sukses
+    private val _authEvent = MutableSharedFlow<AuthResult>()
+    val authEvent = _authEvent.asSharedFlow()
 
-    fun login(noHp: String, password: String) {
+    fun login(noHp: String, pass: String) {
         viewModelScope.launch {
-            _loginState.value = AuthState.Loading
-            try {
-                val res = loginUseCase(noHp, password)
-                pref.saveUser(res.user_id, res.role, res.nama)
-                _loginState.value = AuthState.Success("Login berhasil")
-            } catch (e: Exception) {
-                _loginState.value = AuthState.Error(e.message ?: "Login gagal")
+            _isLoading.value = true
+            _errorMessage.value = null
+
+            val result = repository.login(LoginRequest(noHp, pass))
+
+            result.onSuccess { response ->
+                if (response.success) {
+                    _authEvent.emit(AuthResult.Success(response.role ?: "client"))
+                } else {
+                    _errorMessage.value = response.message ?: "Login Gagal"
+                }
+            }.onFailure {
+                _errorMessage.value = "Koneksi Error: ${it.message}"
             }
+            _isLoading.value = false
         }
     }
 
-    fun register(nama: String, noHp: String, password: String) {
+    fun register(nama: String, noHp: String, pass: String) {
         viewModelScope.launch {
-            _registerState.value = AuthState.Loading
-            try {
-                val res = registerUseCase(nama, noHp, password)
-                _registerState.value = AuthState.Success(res.message)
-            } catch (e: Exception) {
-                _registerState.value = AuthState.Error(e.message ?: "Registrasi gagal")
+            _isLoading.value = true
+            _errorMessage.value = null
+
+            val result = repository.register(RegisterRequest(nama, noHp, pass))
+
+            result.onSuccess { response ->
+                if (response.success) {
+                    _authEvent.emit(AuthResult.RegisterSuccess)
+                } else {
+                    _errorMessage.value = response.message ?: "Registrasi Gagal"
+                }
+            }.onFailure {
+                _errorMessage.value = "Koneksi Error: ${it.message}"
             }
+            _isLoading.value = false
         }
     }
+}
+
+sealed class AuthResult {
+    data class Success(val role: String) : AuthResult()
+    object RegisterSuccess : AuthResult()
 }

@@ -1,36 +1,26 @@
 package com.example.sayurin.data.remote.api
 
-import com.example.sayurin.data.remote.dto.AddressRequest
-import com.example.sayurin.data.remote.dto.AddressListResponse
-import com.example.sayurin.data.remote.dto.BaseResponse
-import com.example.sayurin.data.remote.dto.DefaultAddressResponse
-import com.example.sayurin.data.remote.dto.SetDefaultAddressRequest
+import com.example.sayurin.data.remote.dto.address.*
+import com.example.sayurin.data.remote.dto.sayur.CommonResponse
+import com.example.sayurin.utils.Constants
 import retrofit2.http.*
 
 interface AddressApi {
+    @POST(Constants.ADD_ADDRESS)
+    suspend fun addAddress(@Body request: AddressRequest): CommonResponse
 
-    @POST("/api/addresses/add")
-    suspend fun addAddress(
-        @Body request: AddressRequest
-    ): BaseResponse
+    @GET(Constants.GET_ADDRESSES)
+    suspend fun getAddressesByUser(@Path("user_id") userId: Int): AddressListResponse
 
-    @GET("/api/addresses/user/{user_id}")
-    suspend fun getAddressesByUser(
-        @Path("user_id") userId: Int
-    ): AddressListResponse
+    @GET(Constants.GET_DEFAULT_ADDRESS)
+    suspend fun getDefaultAddress(@Path("user_id") userId: Int): DefaultAddressResponse
 
-    @GET("/api/addresses/default/{user_id}")
-    suspend fun getDefaultAddress(
-        @Path("user_id") userId: Int
-    ): DefaultAddressResponse
+    @POST(Constants.SET_DEFAULT_ADDRESS)
+    suspend fun setDefaultAddress(@Body request: SetDefaultAddressRequest): CommonResponse
 
-    @PUT("/api/addresses/set-default")
-    suspend fun setDefaultAddress(
-        @Body request: SetDefaultAddressRequest
-    ): BaseResponse
+    @DELETE(Constants.DELETE_ADDRESS)
+    suspend fun deleteAddress(@Path("address_id") addressId: Int): CommonResponse
 
-    @DELETE("/api/addresses/{address_id}")
-    suspend fun deleteAddress(
-        @Path("address_id") addressId: Int
-    ): BaseResponse
+    @GET(Constants.SEARCH_DESTINATION)
+    suspend fun searchDestination(@Query("query") query: String): KomerceSearchResponse
 }

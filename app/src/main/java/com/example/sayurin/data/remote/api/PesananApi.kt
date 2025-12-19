@@ -1,29 +1,20 @@
 package com.example.sayurin.data.remote.api
 
-import com.example.sayurin.data.remote.dto.PesananRequest
-import com.example.sayurin.data.remote.dto.PesananResponse
-import com.example.sayurin.data.remote.dto.DetailPesananDto
-import com.example.sayurin.data.remote.dto.BaseResponse
+import com.example.sayurin.data.remote.dto.sayur.CommonResponse // Gunakan yang sudah ada
+import com.example.sayurin.data.remote.dto.pesanan.* // Pastikan path ini benar
+import com.example.sayurin.utils.Constants
 import retrofit2.http.*
 
 interface PesananApi {
+    @POST(Constants.CREATE_PESANAN)
+    suspend fun createPesanan(@Body request: CreatePesananRequest): CommonResponse // Biasanya responnya cukup CommonResponse
 
-    @POST("/api/pesanan")
-    suspend fun createPesanan(
-        @Body request: PesananRequest
-    ): PesananResponse
+    @GET(Constants.GET_PESANAN_ADMIN)
+    suspend fun getPesananAdmin(): List<PesananAdminResponse>
 
-    @GET("/api/pesanan/admin")
-    suspend fun getPesananAdmin(): List<PesananResponse>
+    @GET(Constants.GET_DETAIL_PESANAN)
+    suspend fun getDetailPesanan(@Path("id") id: Int): List<DetailPesananResponse>
 
-    @GET("/api/pesanan/{id}")
-    suspend fun getDetailPesanan(
-        @Path("id") id: Int
-    ): List<DetailPesananDto>
-
-    @PUT("/api/pesanan/{id}/status")
-    suspend fun updateStatusPesanan(
-        @Path("id") id: Int,
-        @Body request: Map<String, String> // backend expects: { "status": "Approved" }
-    ): BaseResponse
+    @PUT(Constants.UPDATE_STATUS_PESANAN)
+    suspend fun updateStatusPesanan(@Path("id") id: Int, @Body request: StatusRequest): CommonResponse
 }

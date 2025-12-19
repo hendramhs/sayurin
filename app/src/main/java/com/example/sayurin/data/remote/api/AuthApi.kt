@@ -1,21 +1,14 @@
 package com.example.sayurin.data.remote.api
 
-import com.example.sayurin.data.remote.dto.LoginRequest
-import com.example.sayurin.data.remote.dto.LoginResponse
-import com.example.sayurin.data.remote.dto.RegisterRequest
-import com.example.sayurin.data.remote.dto.BaseResponse
+import com.example.sayurin.data.remote.dto.auth.*
+import com.example.sayurin.utils.Constants
 import retrofit2.http.Body
 import retrofit2.http.POST
 
 interface AuthApi {
+    @POST(Constants.AUTH_LOGIN)
+    suspend fun login(@Body request: LoginRequest): AuthResponse
 
-    @POST("/api/auth/login")
-    suspend fun login(
-        @Body request: LoginRequest
-    ): LoginResponse
-
-    @POST("/api/auth/register")
-    suspend fun register(
-        @Body request: RegisterRequest
-    ): BaseResponse
+    @POST(Constants.AUTH_REGISTER)
+    suspend fun register(@Body request: RegisterRequest): AuthResponse
 }

@@ -55,6 +55,8 @@ dependencies {
     debugImplementation(libs.compose.tooling)
     implementation(libs.activity.compose)
 
+    implementation(libs.compose.material.icons.extended)
+
     // Navigation
     implementation(libs.navigation.compose)
 

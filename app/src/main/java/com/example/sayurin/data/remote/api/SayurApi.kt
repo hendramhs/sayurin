@@ -1,27 +1,22 @@
 package com.example.sayurin.data.remote.api
 
-import com.example.sayurin.data.remote.dto.SayurDto
-import com.example.sayurin.data.remote.dto.BaseResponse
+import com.example.sayurin.data.remote.dto.sayur.*
+import com.example.sayurin.utils.Constants
 import retrofit2.http.*
 
 interface SayurApi {
+    @GET(Constants.GET_SAYUR)
+    suspend fun getSayur(): List<SayurResponse>
 
-    @GET("/api/sayur")
-    suspend fun getSayur(): List<SayurDto>
+    @POST(Constants.ADD_SAYUR)
+    suspend fun addSayur(@Body request: SayurRequest): CommonResponse
 
-    @POST("/api/sayur")
-    suspend fun addSayur(
-        @Body request: SayurDto
-    ): BaseResponse
-
-    @PUT("/api/sayur/{id}")
+    @PUT(Constants.UPDATE_SAYUR)
     suspend fun updateSayur(
         @Path("id") id: Int,
-        @Body request: SayurDto
-    ): BaseResponse
+        @Body request: SayurRequest
+    ): CommonResponse
 
-    @DELETE("/api/sayur/{id}")
-    suspend fun deleteSayur(
-        @Path("id") id: Int
-    ): BaseResponse
+    @DELETE(Constants.DELETE_SAYUR)
+    suspend fun deleteSayur(@Path("id") id: Int): CommonResponse
 }
