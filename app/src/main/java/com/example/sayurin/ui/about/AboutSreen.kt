@@ -1,13 +1,14 @@
 package com.example.sayurin.ui.about
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Code
-import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -17,8 +18,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -28,6 +31,8 @@ import coil.compose.AsyncImage
 fun AboutScreen(
     onBack: () -> Unit
 ) {
+    val uriHandler = LocalUriHandler.current
+
     Scaffold(
         containerColor = Color(0xFFF8FBF8), // Hijau pucat Sayurin
         topBar = {
@@ -82,7 +87,47 @@ fun AboutScreen(
             Spacer(modifier = Modifier.height(12.dp))
             DeveloperCard(name = "Muhammad Iqbal Pasha Al Farabi", nrp = "152023174")
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // --- SEKSI DEMO APLIKASI ---
+            AboutSectionHeader(title = "Demo Aplikasi", icon = Icons.Default.PlayCircle)
+
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { uriHandler.openUri("https://youtu.be/TmRUouXpDdo") },
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFFFEBEE)), // Merah muda YouTube
+                shape = RoundedCornerShape(12.dp),
+                elevation = CardDefaults.cardElevation(2.dp)
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.PlayCircle,
+                        contentDescription = null,
+                        tint = Color.Red,
+                        modifier = Modifier.size(32.dp)
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Column {
+                        Text(
+                            text = "Tonton Video Demo",
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black
+                        )
+                        Text(
+                            text = "https://youtu.be/TmRUouXpDdo",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color.Blue,
+                            textDecoration = TextDecoration.Underline
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
 
             // --- SEKSI API ---
             AboutSectionHeader(title = "Layanan Data & API", icon = Icons.Default.Public)
@@ -129,10 +174,17 @@ fun AboutScreen(
 @Composable
 fun AboutSectionHeader(title: String, icon: ImageVector) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+        Icon(
+            icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(20.dp)
+        )
         Spacer(modifier = Modifier.width(8.dp))
         Text(text = title, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
     }
