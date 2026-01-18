@@ -21,4 +21,10 @@ interface PesananApi {
 
     @PUT(Constants.UPDATE_STATUS_PESANAN)
     suspend fun updateStatusPesanan(@Path("id") id: Int, @Body request: StatusRequest): CommonResponse
+
+    @GET(Constants.GET_DASHBOARD_STATS)
+    suspend fun getDashboardStats(
+        @Query("month") month: Int,
+        @Query("year") year: Int
+    ): DashboardResponse
 }

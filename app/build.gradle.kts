@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.hilt.android)
+    id("com.google.gms.google-services")
     kotlin("kapt")
 }
 
@@ -48,14 +49,23 @@ android {
 }
 
 dependencies {
+    // Firebase
+    implementation(libs.firebase.database.ktx)
+
     // Jetpack Compose
     implementation(libs.compose.ui)
     implementation(libs.compose.material3)
     implementation(libs.compose.preview)
+    implementation(libs.androidx.ui.graphics)
     debugImplementation(libs.compose.tooling)
     implementation(libs.activity.compose)
 
     implementation(libs.compose.material.icons.extended)
+
+    // Vico Charts
+    implementation("com.patrykandpatrick.vico:compose:2.0.0-alpha.28")
+    implementation("com.patrykandpatrick.vico:compose-m3:2.0.0-alpha.28")
+    implementation("com.patrykandpatrick.vico:core:2.0.0-alpha.28")
 
     // Navigation
     implementation(libs.navigation.compose)

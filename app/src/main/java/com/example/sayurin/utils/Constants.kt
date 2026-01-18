@@ -3,7 +3,7 @@ package com.example.sayurin.utils
 object Constants {
 
     // Api base url
-    const val BASE_URL = "http://192.168.237.246:3000"
+    const val BASE_URL = "http://10.112.54.246:3000"
     // Tips: Gunakan "http://10.0.2.2:3000" jika menggunakan Emulator
 
     // Auth & Datastore Keys
@@ -23,7 +23,6 @@ object Constants {
     const val ADD_SAYUR = "api/sayur"
     const val UPDATE_SAYUR = "api/sayur/{id}"
     const val DELETE_SAYUR = "api/sayur/{id}"
-
 
     // Cart (Keranjang)
     const val ADD_TO_CART = "api/cart/"
@@ -55,11 +54,18 @@ object Constants {
     const val GET_DETAIL_PESANAN = "api/pesanan/{id}"
     const val UPDATE_STATUS_PESANAN = "api/pesanan/{id}/status"
 
+    // Dashboard Admin (Baru)
+    const val GET_DASHBOARD_STATS = "api/pesanan/admin/dashboard-stats"
+
     // --- NAVIGATION ROUTES ---
     const val ROUTE_LOGIN = "login"
     const val ROUTE_REGISTER = "register"
     const val ROUTE_USER_HOME = "user_home"
     const val ROUTE_ADMIN_HOME = "admin_home"
+    const val ROUTE_ADMIN_DASHBOARD = "admin_dashboard" // Baru
+    const val ROUTE_ADMIN_SAYUR = "admin_sayur"
+    const val ROUTE_ADMIN_PESANAN = "admin_pesanan"
+    const val ROUTE_ADMIN_CHAT_LIST = "admin_chat_list"
     const val ROUTE_CART = "cart"
     const val ROUTE_CHECKOUT = "checkout"
     const val ROUTE_ADDRESS = "address"

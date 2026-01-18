@@ -1,12 +1,10 @@
 package com.example.sayurin.ui.client
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -24,20 +22,23 @@ fun MainScreen(
     navController: NavHostController,
     onLogout: () -> Unit
 ) {
-    // Mendapatkan rute saat ini untuk menentukan visibilitas bar
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    // Daftar rute yang akan menampilkan TopBar dan BottomBar
+    // Daftar rute utama yang akan menampilkan TopBar dan BottomBar aplikasi
     val clientBottomRoutes = listOf(
         Screen.ClientHome.route,
         Screen.PesananUser.route,
         Screen.Cart.route
+        // Screen.Chat.route DIHAPUS dari sini agar Chat menjadi Full Screen
     )
+
+    // Cek apakah rute saat ini adalah chat untuk mengatur padding secara dinamis
+    val isChatRoute = currentRoute == Screen.Chat.route
 
     Scaffold(
         topBar = {
-            // Tampilkan Header Global hanya jika berada di rute utama client
+            // Hanya tampilkan TopBar global jika rute ada di daftar rute utama
             if (currentRoute in clientBottomRoutes) {
                 CenterAlignedTopAppBar(
                     title = {
@@ -48,7 +49,15 @@ fun MainScreen(
                         )
                     },
                     actions = {
-                        // Tombol About di pojok kanan atas
+                        // TOMBOL UNTUK NAVIGASI KE CHAT
+                        IconButton(onClick = { navController.navigate(Screen.Chat.route) }) {
+                            Icon(
+                                imageVector = Icons.Default.Chat,
+                                contentDescription = "Chat Admin",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+
                         IconButton(onClick = { navController.navigate(Screen.About.route) }) {
                             Icon(
                                 imageVector = Icons.Default.Info,
@@ -64,7 +73,7 @@ fun MainScreen(
             }
         },
         bottomBar = {
-            // Tampilkan Bottom Navigation
+            // Hanya tampilkan BottomBar jika rute ada di daftar rute utama
             if (currentRoute in clientBottomRoutes) {
                 NavigationBar(
                     containerColor = MaterialTheme.colorScheme.surface,
@@ -84,7 +93,7 @@ fun MainScreen(
                         }
                     )
 
-                    // Item: RIWAYAT / HISTORY
+                    // Item: RIWAYAT
                     NavigationBarItem(
                         icon = { Icon(Icons.Default.History, contentDescription = null) },
                         label = { Text("Riwayat") },
@@ -98,7 +107,7 @@ fun MainScreen(
                         }
                     )
 
-                    // Item: KERANJANG / CART
+                    // Item: KERANJANG
                     NavigationBarItem(
                         icon = { Icon(Icons.Default.ShoppingCart, contentDescription = null) },
                         label = { Text("Keranjang") },
@@ -115,8 +124,10 @@ fun MainScreen(
             }
         }
     ) { paddingValues ->
-        // Konten utama aplikasi dibungkus dengan padding agar tidak tertutup bar
-        Box(modifier = Modifier.padding(paddingValues)) {
+        // Jika sedang di halaman chat, abaikan padding (set ke 0) agar area input tidak terangkat
+        val contentPadding = if (isChatRoute) PaddingValues(0.dp) else paddingValues
+
+        Box(modifier = Modifier.padding(contentPadding)) {
             NavGraph(
                 navController = navController,
                 onLogout = onLogout

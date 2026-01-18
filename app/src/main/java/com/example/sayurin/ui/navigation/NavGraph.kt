@@ -2,8 +2,11 @@ package com.example.sayurin.ui.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
+import com.example.sayurin.ui.admin.home.AdminDashboardScreen
 import com.example.sayurin.ui.admin.manage_sayur.AdminSayurScreen
 import com.example.sayurin.ui.admin.manage_sayur.AddSayurScreen
 import com.example.sayurin.ui.admin.manage_pesanan.AdminPesananScreen
@@ -15,12 +18,17 @@ import com.example.sayurin.ui.client.address.AddAddressScreen
 import com.example.sayurin.ui.client.cart.CartScreen
 import com.example.sayurin.ui.client.checkout.CheckoutScreen
 import com.example.sayurin.ui.client.pesanan.PesananScreen
-import com.example.sayurin.ui.about.AboutScreen // Import AboutScreen
+import com.example.sayurin.ui.about.AboutScreen
+// PERBAIKAN IMPORT: Menggunakan dua layar yang berbeda
+import com.example.sayurin.ui.client.chat.ChatScreen as ClientChatScreen
+import com.example.sayurin.ui.admin.chat.AdminChatScreen
+import com.example.sayurin.ui.admin.chat.AdminChatListScreen
 
 @Composable
 fun NavGraph(
     navController: NavHostController,
     startDestination: String = Screen.Login.route,
+    userId: Int = 0,
     onLogout: () -> Unit
 ) {
     NavHost(
@@ -32,7 +40,7 @@ fun NavGraph(
             LoginScreen(
                 onNavigateToRegister = { navController.navigate(Screen.Register.route) },
                 onLoginSuccess = { role ->
-                    val dest = if (role == "admin") Screen.AdminSayur.route else Screen.ClientHome.route
+                    val dest = if (role == "admin") Screen.AdminDashboard.route else Screen.ClientHome.route
                     navController.navigate(dest) {
                         popUpTo(Screen.Login.route) { inclusive = true }
                     }
@@ -46,9 +54,14 @@ fun NavGraph(
 
         // --- CLIENT GROUP ---
         composable(Screen.ClientHome.route) {
-            // Perbaikan: HomeScreen sekarang tidak perlu parameter navigasi banyak
-            // karena navigasi Cart & History sudah ada di BottomBar
             HomeScreen()
+        }
+
+        composable(Screen.Chat.route) {
+            // Menggunakan ClientChatScreen untuk sisi pembeli
+            ClientChatScreen(
+                onBack = { navController.popBackStack() }
+            )
         }
 
         composable(Screen.Cart.route) {
@@ -86,6 +99,10 @@ fun NavGraph(
         }
 
         // --- ADMIN GROUP ---
+        composable(Screen.AdminDashboard.route) {
+            AdminDashboardScreen()
+        }
+
         composable(Screen.AdminSayur.route) {
             AdminSayurScreen(
                 onNavigateToAdd = { navController.navigate(Screen.AddSayur.route) }
@@ -98,6 +115,26 @@ fun NavGraph(
 
         composable(Screen.AdminPesanan.route) {
             AdminPesananScreen()
+        }
+
+        composable(Screen.AdminChatList.route) {
+            AdminChatListScreen(
+                onRoomClick = { targetUserId ->
+                    navController.navigate(Screen.AdminChatDetail.createRoute(targetUserId))
+                }
+            )
+        }
+
+        composable(
+            route = Screen.AdminChatDetail.route,
+            arguments = listOf(navArgument("userId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val targetUserId = backStackEntry.arguments?.getInt("userId") ?: 0
+            // Menggunakan AdminChatScreen untuk sisi admin
+            AdminChatScreen(
+                userId = targetUserId,
+                onBack = { navController.popBackStack() }
+            )
         }
 
         // --- COMMON ---

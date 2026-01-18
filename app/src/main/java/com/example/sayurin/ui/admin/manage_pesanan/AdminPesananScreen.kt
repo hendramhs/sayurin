@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
@@ -32,7 +31,7 @@ fun AdminPesananScreen(
     val detailList = viewModel.detailList
     val isLoading = viewModel.isLoading
 
-    // Dialog Detail Item (Dipercantik)
+    // Dialog Detail Item
     if (detailList.isNotEmpty()) {
         AlertDialog(
             onDismissRequest = { viewModel.clearDetail() },
@@ -81,7 +80,6 @@ fun AdminPesananScreen(
         )
     }
 
-    // Body Screen (Tanpa Scaffold internal agar tidak double topbar)
     Box(modifier = Modifier.fillMaxSize().background(Color(0xFFF8FBF8))) {
         if (isLoading && pesananList.isEmpty()) {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
@@ -99,7 +97,8 @@ fun AdminPesananScreen(
                     pesanan = pesanan,
                     onClick = { viewModel.fetchDetail(pesanan.pesanan_id) },
                     onApprove = { viewModel.updateStatus(pesanan.pesanan_id, "Approved") },
-                    onReject = { viewModel.updateStatus(pesanan.pesanan_id, "Rejected") }
+                    onReject = { viewModel.updateStatus(pesanan.pesanan_id, "Rejected") },
+                    onShip = { viewModel.updateStatus(pesanan.pesanan_id, "Shipped") }
                 )
             }
         }
@@ -111,7 +110,8 @@ fun PesananAdminCard(
     pesanan: PesananAdminResponse,
     onClick: () -> Unit,
     onApprove: () -> Unit,
-    onReject: () -> Unit
+    onReject: () -> Unit,
+    onShip: () -> Unit
 ) {
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
@@ -163,50 +163,63 @@ fun PesananAdminCard(
 
             Spacer(Modifier.height(12.dp))
 
-            // Total Bayar
+            // Total Bayar & Status
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                 Column {
                     Text("Total Pembayaran", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
                     Text("Rp ${pesanan.total_bayar}", fontWeight = FontWeight.ExtraBold, fontSize = 18.sp, color = MaterialTheme.colorScheme.primary)
                 }
-
-                // Status Badge
                 StatusBadge(status = pesanan.status)
             }
 
             Spacer(Modifier.height(12.dp))
 
-            // Action Buttons
-            if (pesanan.status == "Pending") {
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    OutlinedButton(
-                        onClick = onReject,
-                        modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(10.dp),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Red)
-                    ) {
-                        Icon(Icons.Default.Cancel, null, modifier = Modifier.size(16.dp))
-                        Spacer(Modifier.width(4.dp))
-                        Text("Reject")
-                    }
-                    Button(
-                        onClick = onApprove,
-                        modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(10.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50))
-                    ) {
-                        Icon(Icons.Default.CheckCircle, null, modifier = Modifier.size(16.dp))
-                        Spacer(Modifier.width(4.dp))
-                        Text("Approve")
+            // Action Buttons Logic
+            when (pesanan.status) {
+                "Pending" -> {
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        OutlinedButton(
+                            onClick = onReject,
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(10.dp),
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Red)
+                        ) {
+                            Icon(Icons.Default.Cancel, null, modifier = Modifier.size(16.dp))
+                            Spacer(Modifier.width(4.dp))
+                            Text("Tolak")
+                        }
+                        Button(
+                            onClick = onApprove,
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(10.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50))
+                        ) {
+                            Icon(Icons.Default.CheckCircle, null, modifier = Modifier.size(16.dp))
+                            Spacer(Modifier.width(4.dp))
+                            Text("Setuju")
+                        }
                     }
                 }
-            } else {
-                Text(
-                    "Klik untuk riwayat detail item",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = Color.LightGray,
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                )
+                "Approved" -> {
+                    Button(
+                        onClick = onShip,
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(10.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF673AB7)) // Warna Ungu untuk Kirim
+                    ) {
+                        Icon(Icons.Default.LocalShipping, null, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(8.dp))
+                        Text("Kirim Pesanan")
+                    }
+                }
+                else -> {
+                    Text(
+                        "Klik untuk riwayat detail item",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.LightGray,
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
+                }
             }
         }
     }
@@ -214,15 +227,18 @@ fun PesananAdminCard(
 
 @Composable
 fun StatusBadge(status: String) {
-    val (bgColor, textColor) = when (status) {
-        "Approved" -> Color(0xFFE8F5E9) to Color(0xFF2E7D32)
-        "Rejected" -> Color(0xFFFFEBEE) to Color(0xFFC62828)
-        else -> Color(0xFFFFF3E0) to Color(0xFFEF6C00)
+    val (bgColor, textColor, label) = when (status) {
+        "Pending" -> Triple(Color(0xFFFFF3E0), Color(0xFFEF6C00), "Menunggu")
+        "Approved" -> Triple(Color(0xFFE3F2FD), Color(0xFF1976D2), "Dikemas")
+        "Shipped" -> Triple(Color(0xFFF3E5F5), Color(0xFF7B1FA2), "Dikirim")
+        "Completed" -> Triple(Color(0xFFE8F5E9), Color(0xFF2E7D32), "Selesai")
+        "Rejected" -> Triple(Color(0xFFFFEBEE), Color(0xFFC62828), "Ditolak")
+        else -> Triple(Color(0xFFF5F5F5), Color.Gray, status)
     }
 
     Surface(color = bgColor, shape = RoundedCornerShape(8.dp)) {
         Text(
-            text = status,
+            text = label,
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
             color = textColor,
             style = MaterialTheme.typography.labelLarge,

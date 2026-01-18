@@ -1,6 +1,5 @@
 package com.example.sayurin.ui.client.pesanan
 
-import androidx.activity.result.launch
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -25,32 +24,60 @@ class PesananViewModel @Inject constructor(
     var detailList by mutableStateOf<List<DetailPesananResponse>>(emptyList())
         private set
     var isLoading by mutableStateOf(false)
+        private set
 
     init {
         fetchPesanan()
     }
 
+    /**
+     * Mengambil daftar pesanan milik user yang sedang login
+     */
     fun fetchPesanan() {
         viewModelScope.launch {
             isLoading = true
             val userId = userPrefs.userId.first() ?: 0
             repo.getPesananUser(userId).onSuccess {
                 pesananList = it
+            }.onFailure {
+                // Handle error jika diperlukan (misal: kirim ke state error)
             }
             isLoading = false
         }
     }
 
+    /**
+     * Mengambil detail item sayur di dalam satu pesanan
+     */
     fun fetchDetail(pesananId: Int) {
         viewModelScope.launch {
-            // Gunakan repo yang sama dengan Admin karena endpoint detailnya sama
             repo.getDetailPesanan(pesananId).onSuccess {
                 detailList = it
             }
         }
     }
 
+    /**
+     * Menghapus list detail saat dialog ditutup
+     */
     fun clearDetail() {
         detailList = emptyList()
+    }
+
+    /**
+     * Fungsi untuk memperbarui status pesanan oleh Client.
+     * Digunakan untuk mengubah status dari "Shipped" ke "Completed".
+     */
+    fun updateStatus(pesananId: Int, newStatus: String) {
+        viewModelScope.launch {
+            isLoading = true
+            repo.updateStatus(pesananId, newStatus).onSuccess {
+                // Refresh data agar UI menampilkan status "Selesai" dan menghilangkan tombol
+                fetchPesanan()
+            }.onFailure {
+                isLoading = false
+                // Handle error (misal: tampilkan pesan gagal update)
+            }
+        }
     }
 }

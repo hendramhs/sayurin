@@ -29,7 +29,7 @@ fun PesananScreen(
     val detailList = viewModel.detailList
     val isLoading = viewModel.isLoading
 
-    // --- DIALOG DETAIL ITEM (DIPERBAGUS) ---
+    // --- DIALOG DETAIL ITEM ---
     if (detailList.isNotEmpty()) {
         AlertDialog(
             onDismissRequest = { viewModel.clearDetail() },
@@ -73,7 +73,7 @@ fun PesananScreen(
     }
 
     Scaffold(
-        containerColor = Color(0xFFF8FBF8), // Background hijau pucat khas Sayurin
+        containerColor = Color(0xFFF8FBF8),
         topBar = {
             CenterAlignedTopAppBar(
                 title = { Text("Riwayat Pesanan", fontWeight = FontWeight.Bold) },
@@ -124,18 +124,21 @@ fun PesananScreen(
 
                         Spacer(modifier = Modifier.height(12.dp))
 
-                        // Status Chip
-                        val statusColor = when (pesanan.status) {
-                            "Approved" -> Color(0xFF2E7D32)
-                            "Pending" -> Color(0xFFEF6C00)
-                            else -> Color(0xFFC62828)
+                        // --- LOGIKA STATUS BARU ---
+                        val (statusLabel, statusColor) = when (pesanan.status) {
+                            "Pending" -> "Belum Bayar" to Color(0xFFEF6C00)   // Oranye
+                            "Approved" -> "Dikemas" to Color(0xFF1976D2)     // Biru
+                            "Shipped" -> "Dikirim" to Color(0xFF673AB7)      // Ungu
+                            "Completed" -> "Selesai" to Color(0xFF2E7D32)    // Hijau
+                            else -> pesanan.status to Color.Gray
                         }
+
                         Surface(
                             color = statusColor.copy(alpha = 0.1f),
                             shape = RoundedCornerShape(4.dp)
                         ) {
                             Text(
-                                text = pesanan.status,
+                                text = statusLabel,
                                 color = statusColor,
                                 fontWeight = FontWeight.Bold,
                                 style = MaterialTheme.typography.labelLarge,
@@ -174,11 +177,11 @@ fun PesananScreen(
                             }
                         }
 
-                        // Total Bayar
+                        // Total Bayar & Tombol Aksi
                         Row(
                             Modifier.fillMaxWidth().padding(top = 4.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.Bottom
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             Column {
                                 Text("Total Bayar", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
@@ -190,12 +193,24 @@ fun PesananScreen(
                                 )
                             }
 
-                            Text(
-                                text = "Lihat Detail >",
-                                style = MaterialTheme.typography.labelLarge,
-                                color = MaterialTheme.colorScheme.primary,
-                                fontWeight = FontWeight.Bold
-                            )
+                            // TOMBOL KONFIRMASI (Hanya muncul jika status Shipped / Dikirim)
+                            if (pesanan.status == "Shipped") {
+                                Button(
+                                    onClick = { viewModel.updateStatus(pesanan.pesanan_id, "Completed") },
+                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32)),
+                                    shape = RoundedCornerShape(8.dp),
+                                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
+                                ) {
+                                    Text("Pesanan Diterima", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                }
+                            } else {
+                                Text(
+                                    text = "Lihat Detail >",
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
                         }
                     }
                 }

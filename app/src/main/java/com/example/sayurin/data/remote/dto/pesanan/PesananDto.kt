@@ -70,3 +70,34 @@ data class DetailPesananResponse(
 data class StatusRequest(
     val status: String
 )
+
+data class DashboardResponse(
+    val success: Boolean,
+    val summary: DashboardSummary,
+    val revenue: RevenueGroup, // Perubahan di sini
+    val status_distribution: List<StatusDist>,
+    val top_selling: List<TopSelling>
+)
+
+data class RevenueGroup(
+    val daily: List<RevenueData>,
+    val weekly: List<RevenueData>,
+    val monthly: List<RevenueData>
+)
+
+data class DashboardSummary(
+    val total_pendapatan: Long,
+    val total_pending: Int,
+    val total_approved: Int,
+    val total_shipped: Int,
+    val total_completed: Int,
+    val total_rejected: Int
+)
+
+data class RevenueData(
+    val tanggal: String? = null,val week: String? = null,  // Tambahkan ini
+    val month: String? = null, // Tambahkan ini
+    val total: String
+)
+data class StatusDist(val status: String, val count: Int)
+data class TopSelling(val nama_sayur: String, val total_qty: Int)

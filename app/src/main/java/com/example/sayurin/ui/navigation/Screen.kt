@@ -12,12 +12,18 @@ sealed class Screen(val route: String) {
     object Cart : Screen("cart")
     object Checkout : Screen("checkout")
     object PesananUser : Screen("pesanan_user")
+    object Chat : Screen("chat") // Chat untuk Client ke Admin
 
     // --- ADMIN ---
-    // Ubah AdminDashboard menjadi AdminSayur agar sinkron dengan menu BottomNav "Inventori"
+    object AdminDashboard : Screen("admin_dashboard")
     object AdminSayur : Screen("admin_sayur")
     object AddSayur : Screen("add_sayur")
     object AdminPesanan : Screen("admin_pesanan")
+    object AdminChatList : Screen("admin_chat_list") // Daftar chat pembeli
+    // Rute dinamis untuk admin membalas chat tertentu
+    object AdminChatDetail : Screen("admin_chat_detail/{userId}") {
+        fun createRoute(userId: Int) = "admin_chat_detail/$userId"
+    }
 
     // --- COMMON ---
     object About : Screen("about")
